@@ -1,1 +1,131 @@
-<rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:media="http://search.yahoo.com/mrss/" version="2.0"><channel><title>thnovice</title><description>Thoughts, stories and ideas.</description><link>http://localhost:2368/</link><image><url>http://localhost:2368/favicon.png</url><title>thnovice</title><link>http://localhost:2368/</link></image><generator>Ghost 3.14</generator><lastBuildDate>Fri, 01 May 2020 15:06:01 GMT</lastBuildDate><atom:link href="http://localhost:2368/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl></channel></rss>
+<rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:media="http://search.yahoo.com/mrss/" version="2.0"><channel><title>Thnovice</title><description>My Blog !</description><link>http://localhost:2368/</link><image><url>http://localhost:2368/favicon.png</url><title>Thnovice</title><link>http://localhost:2368/</link></image><generator>Ghost 3.14</generator><lastBuildDate>Fri, 01 May 2020 15:27:04 GMT</lastBuildDate><atom:link href="http://localhost:2368/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title>Kong with Docker ( Docker Compose )</title><description>&lt;blockquote&gt;basic install kong with docker-compose&lt;/blockquote&gt;&lt;h3 id="-install-postgres-database"&gt;- Install Postgres database&lt;/h3&gt;&lt;pre&gt;&lt;code class="language-sh"&gt;$ docker run -d --name kong-database \
+-e POSTGRES_PASSWORD=secret \
+-p 5432:5432 \
+postgres
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id="-create-database"&gt;- Create database&lt;/h3&gt;&lt;pre&gt;&lt;code class="language-sh"&gt;$ docker exec -it kong-database psql --username postgres --command "CREATE DATABASE kong_app;"
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;or เพิ่ม -e POSTGRES_DB=kong ก็ได้&lt;/p&gt;&lt;pre&gt;&lt;code class="language-sh"&gt;$ docker run -d --name&lt;/code&gt;&lt;/pre&gt;</description><link>http://localhost:2368/kong-with-docker-docker-compose/</link><guid isPermaLink="false">5eac3dd643d70809315c1157</guid><category>devops</category><dc:creator>Jaedsada</dc:creator><pubDate>Fri, 01 May 2020 15:20:32 GMT</pubDate><media:content url="http://localhost:2368/content/images/2020/05/kong_logo_banner.png" medium="image"/><content:encoded>&lt;blockquote&gt;basic install kong with docker-compose&lt;/blockquote&gt;&lt;h3 id="-install-postgres-database"&gt;- Install Postgres database&lt;/h3&gt;&lt;pre&gt;&lt;code class="language-sh"&gt;$ docker run -d --name kong-database \
+-e POSTGRES_PASSWORD=secret \
+-p 5432:5432 \
+postgres
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id="-create-database"&gt;- Create database&lt;/h3&gt;&lt;pre&gt;&lt;code class="language-sh"&gt;$ docker exec -it kong-database psql --username postgres --command "CREATE DATABASE kong_app;"
+&lt;/code&gt;&lt;/pre&gt;&lt;img src="http://localhost:2368/content/images/2020/05/kong_logo_banner.png" alt="Kong with Docker ( Docker Compose )"&gt;&lt;p&gt;or เพิ่ม -e POSTGRES_DB=kong ก็ได้&lt;/p&gt;&lt;pre&gt;&lt;code class="language-sh"&gt;$ docker run -d --name kong-postgres \
+-e POSTGRES_DB=kong \
+--network=kong-net \
+-e POSTGRES_PASSWORD=secret \
+-p 5432:5432 \
+postgres
+&lt;/code&gt;&lt;/pre&gt;&lt;figure class="kg-card kg-image-card"&gt;&lt;img src="http://filemanager.thnovice.me/images/photo/files-1585204050897.png" class="kg-image" alt="Kong with Docker ( Docker Compose )"&gt;&lt;/figure&gt;&lt;h3 id="-create-network"&gt;- Create network&lt;/h3&gt;&lt;pre&gt;&lt;code class="language-sh"&gt;$ docker network create kong-net
+&lt;/code&gt;&lt;/pre&gt;&lt;hr&gt;&lt;h3 id="docker-compose-yml"&gt;docker-compose.yml&lt;/h3&gt;&lt;pre&gt;&lt;code class="language-yaml"&gt;version: '3'
+
+services:
+  migrations:
+    image:  kong:latest
+    container_name: kong-migrations
+    environment:
+      KONG_DATABASE: postgres
+      KONG_PG_HOST: &amp;lt;ip host database&amp;gt;
+      KONG_PG_USER: postgres
+      KONG_PG_PASSWORD: secret
+      KONG_PG_PORT: 5432
+      KONG_PG_SCHEMA: public
+      KONG_PG_DATABASE: kong
+    networks:
+      - kong-net
+    command: kong migrations bootstrap
+
+  kong:
+    image: kong:latest
+    container_name: kong
+    restart: always
+    environment:
+      KONG_DATABASE: postgres
+      KONG_PG_HOST: &amp;lt;ip host database&amp;gt;
+      KONG_PG_USER: postgres
+      KONG_PG_PASSWORD: secret
+      KONG_PG_PORT: 5432
+      KONG_PG_SCHEMA: public
+      KONG_PG_DATABASE: kong
+      KONG_PROXY_ACCESS_LOG: /dev/stdout
+      KONG_ADMIN_ACCESS_LOG: /dev/stdout
+      KONG_PROXY_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_LISTEN: 0.0.0.0:8001, 0.0.0.0:8444 ssl
+    networks:
+      - kong-net
+    ports:
+      - 80:8000
+      - 8001:8001
+      - 39021:8001
+      - 39424:8444
+networks:
+  kong-net:
+&lt;/code&gt;&lt;/pre&gt;&lt;ul&gt;&lt;li&gt;ส่วน migration&lt;/li&gt;&lt;/ul&gt;&lt;pre&gt;&lt;code class="language-yaml"&gt;migrations:
+    image:  kong:latest
+    container_name: kong-migrations # ชื่อ container
+    environment:
+      KONG_DATABASE: postgres 
+      KONG_PG_HOST: 127.0.0.1
+      KONG_PG_USER: postgres
+      KONG_PG_PASSWORD: secret
+      KONG_PG_PORT: 5432
+      KONG_PG_SCHEMA: public
+      KONG_PG_DATABASE: kong
+    networks: 
+      - kong-net # network ที่เราสร้าง
+    command: kong migrations bootstrap # สั่งให้ทำคำสั่งนี้หลัง start container
+&lt;/code&gt;&lt;/pre&gt;&lt;pre&gt;&lt;code class="language-sh"&gt;$ docker-compose up migrations
+&lt;/code&gt;&lt;/pre&gt;&lt;figure class="kg-card kg-image-card"&gt;&lt;img src="http://filemanager.thnovice.me/images/photo/files-1585205762356.png" class="kg-image" alt="Kong with Docker ( Docker Compose )"&gt;&lt;/figure&gt;&lt;ul&gt;&lt;li&gt;ส่วน kong app&lt;/li&gt;&lt;/ul&gt;&lt;pre&gt;&lt;code class="language-yaml"&gt;kong:
+    image: kong:latest
+    container_name: kong
+    restart: always
+    environment:
+      KONG_DATABASE: postgres
+      KONG_PG_HOST: 127.0.0.1
+      KONG_PG_USER: postgres
+      KONG_PG_PASSWORD: secret
+      KONG_PG_PORT: 5432
+      KONG_PG_SCHEMA: public
+      KONG_PG_DATABASE: kong
+      KONG_PROXY_ACCESS_LOG: /dev/stdout
+      KONG_ADMIN_ACCESS_LOG: /dev/stdout
+      KONG_PROXY_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_LISTEN: 0.0.0.0:8001, 0.0.0.0:8444 ssl # port สำหรับ จัดการ
+    networks:
+      - kong-net
+    ports:
+      - 80:8000
+      - 8001:8001
+      - 39021:8001
+      - 39424:8444
+&lt;/code&gt;&lt;/pre&gt;&lt;pre&gt;&lt;code class="language-sh"&gt;$ docker-compose up -d kong
+&lt;/code&gt;&lt;/pre&gt;&lt;figure class="kg-card kg-image-card"&gt;&lt;img src="http://filemanager.thnovice.me/images/photo/files-1585205842595.png" class="kg-image" alt="Kong with Docker ( Docker Compose )"&gt;&lt;/figure&gt;&lt;h3 id="-localhost-8000"&gt;ลอง ไปที่ &lt;a href="http://filemanager.thnovice.me/images/photo/files-1585205762356.png"&gt;localhost:8000&lt;/a&gt;&lt;/h3&gt;&lt;figure class="kg-card kg-image-card"&gt;&lt;img src="http://filemanager.thnovice.me/images/photo/files-1585205884071.png" class="kg-image" alt="Kong with Docker ( Docker Compose )"&gt;&lt;/figure&gt;&lt;figure class="kg-card kg-image-card"&gt;&lt;img src="http://filemanager.thnovice.me/images/photo/files-1585205894945.png" class="kg-image" alt="Kong with Docker ( Docker Compose )"&gt;&lt;/figure&gt;</content:encoded></item><item><title>Jenkins install on Ubuntu 18.04</title><description>&lt;!--kg-card-begin: markdown--&gt;&lt;hr&gt;
+&lt;h3 id="step1installjava"&gt;Step 1 Install Java&lt;/h3&gt;
+&lt;pre&gt;&lt;code class="language-sh"&gt;$ sudo apt-get update
+$ sudo apt-get install openjdk-11-jdk -y
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3 id="step2installjenkins"&gt;Step 2 Install Jenkins&lt;/h3&gt;
+&lt;pre&gt;&lt;code class="language-sh"&gt;$ wget -q -O - https://pkg.jenkins.io/debian/jenkins.io.key | sudo apt-key add -
+$ sudo sh -c 'echo deb http://pkg.jenkins.io/debian-stable binary/ &amp;gt; /etc/apt/sources.list.d/jenkins.&lt;/code&gt;&lt;/pre&gt;</description><link>http://localhost:2368/jenkins-pure/</link><guid isPermaLink="false">5eac3cb143d70809315c1140</guid><category>devops</category><dc:creator>Jaedsada</dc:creator><pubDate>Fri, 01 May 2020 15:16:42 GMT</pubDate><media:content url="http://localhost:2368/content/images/2020/05/logo-title-opengraph.png" medium="image"/><content:encoded>&lt;!--kg-card-begin: markdown--&gt;&lt;hr&gt;
+&lt;h3 id="step1installjava"&gt;Step 1 Install Java&lt;/h3&gt;
+&lt;pre&gt;&lt;code class="language-sh"&gt;$ sudo apt-get update
+$ sudo apt-get install openjdk-11-jdk -y
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3 id="step2installjenkins"&gt;Step 2 Install Jenkins&lt;/h3&gt;
+&lt;pre&gt;&lt;code class="language-sh"&gt;$ wget -q -O - https://pkg.jenkins.io/debian/jenkins.io.key | sudo apt-key add -
+$ sudo sh -c 'echo deb http://pkg.jenkins.io/debian-stable binary/ &amp;gt; /etc/apt/sources.list.d/jenkins.list'
+$ sudo apt update
+$ sudo apt install jenkins -y
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3 id="step3startservice"&gt;Step 3 Start Service&lt;/h3&gt;
+&lt;pre&gt;&lt;code class="language-sh"&gt;$ systemctl start jenkins
+$ sudo ufw allow 8080
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3 id="step4checkport"&gt;Step 4 Check port&lt;/h3&gt;
+&lt;pre&gt;&lt;code class="language-sh"&gt;$ sudo ufw status
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3 id="step5changedefaultport"&gt;Step 5 Change Default Port&lt;/h3&gt;
+&lt;pre&gt;&lt;code class="language-sh"&gt;$ sudo iptables -A PREROUTING -t nat -i eth0 -p tcp --dport 80 -j REDIRECT --to-port 8080
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2 id="success"&gt;Success&lt;/h2&gt;
+&lt;!--kg-card-end: markdown--&gt;</content:encoded></item></channel></rss>
